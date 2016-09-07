@@ -3,8 +3,9 @@ import os
 from flask import Flask
 from flask import abort, flash, make_response, redirect, render_template, request, session, url_for
 from flask.ext.bootstrap import Bootstrap
+from flask.ext.migrate import Migrate, MigrateCommand
 from flask.ext.moment import Moment
-from flask.ext.script import Manager
+from flask.ext.script import Manager, Shell
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.wtf import Form
 
@@ -23,6 +24,7 @@ manager = Manager(app)
 moment = Moment(app)
 bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 
 class Role(db.Model):
@@ -48,6 +50,12 @@ class User(db.Model):
 class NameForm(Form):
 	name = StringField('What is your name?', validators=[Required()])
 	submit = SubmitField('Submit')
+
+
+def make_shell_context():
+	return dict(app=app, db=db, User=User, Role=Role)
+manager.add_command('shell', Shell(make_context=make_shell_context))
+manager.add_command('db', MigrateCommand)
 
 
 @app.errorhandler(404)
