@@ -1,12 +1,5 @@
 from flask import Flask
-from flask import abort
-from flask import make_response
-from flask import redirect
-from flask import render_template
-from flask import request
-from flask import session
-from flask import url_for
-
+from flask import abort, flash, make_response, redirect, render_template, request, session, url_for
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.moment import Moment
 from flask.ext.script import Manager
@@ -44,7 +37,11 @@ def internal_server_error(e):
 def index():
 	form = NameForm()
 	if form.validate_on_submit():
+		old_name = session.get('name')
+		if old_name is not None and old_name != form.name.data:
+			flash("You changed your name.")
 		session['name'] = form.name.data
+		form.name.data = ''
 		return redirect(url_for('index'))
 	return render_template('index.html', form=form, name=session.get('name'), current_time=datetime.utcnow())
 
