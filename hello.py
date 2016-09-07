@@ -1,39 +1,55 @@
 from flask import Flask
-from flask import abort
-from flask import make_response
-from flask import redirect
-from flask import render_template
-from flask import request
-
+from flask import abort, flash, make_response, redirect, render_template, request, session, url_for
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.moment import Moment
 from flask.ext.script import Manager
+from flask.ext.wtf import Form
 
 from datetime import datetime
+from wtforms import StringField, SubmitField
+from wtforms.validators import Required
 
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'fjdskfr4k353fj943jf34jrkscf9r384'
 
 manager = Manager(app)
 moment = Moment(app)
 bootstrap = Bootstrap(app)
 
 
-@app.route('/')
-def index():
-	return render_template('index.html', current_time=datetime.utcnow())
+class NameForm(Form):
+	name = StringField('What is your name?', validators=[Required()])
+	submit = SubmitField('Submit')
 
-@app.route('/user/<name>')
-def user(name):
-	return render_template('user.html', name=name)
 
 @app.errorhandler(404)
 def page_not_found(e):
 	return render_template('404.html'), 404
 
+
 @app.errorhandler(500)
 def internal_server_error(e):
 	return render_template('500.html'), 500
+
+
+@app.route('/', methods=['GET','POST'])
+def index():
+	form = NameForm()
+	if form.validate_on_submit():
+		old_name = session.get('name')
+		if old_name is not None and old_name != form.name.data:
+			flash("You changed your name.")
+		session['name'] = form.name.data
+		form.name.data = ''
+		return redirect(url_for('index'))
+	return render_template('index.html', form=form, name=session.get('name'), current_time=datetime.utcnow())
+
+
+@app.route('/user/<name>')
+def user(name):
+	return render_template('user.html', name=name)
+
 
 # @app.route('/')
 # def index():
