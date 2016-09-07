@@ -4,6 +4,8 @@ from flask import make_response
 from flask import redirect
 from flask import render_template
 from flask import request
+from flask import session
+from flask import url_for
 
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.moment import Moment
@@ -40,12 +42,11 @@ def internal_server_error(e):
 
 @app.route('/', methods=['GET','POST'])
 def index():
-	name = None
 	form = NameForm()
 	if form.validate_on_submit():
-		name = form.name.data
-		form.name.data = ''
-	return render_template('index.html', name=name, form=form, current_time=datetime.utcnow())
+		session['name'] = form.name.data
+		return redirect(url_for('index'))
+	return render_template('index.html', form=form, name=session.get('name'), current_time=datetime.utcnow())
 
 
 @app.route('/user/<name>')
