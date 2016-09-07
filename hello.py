@@ -6,18 +6,22 @@ from flask import render_template
 from flask import request
 
 from flask.ext.bootstrap import Bootstrap
+from flask.ext.moment import Moment
 from flask.ext.script import Manager
+
+from datetime import datetime
 
 
 app = Flask(__name__)
 
 manager = Manager(app)
+moment = Moment(app)
 bootstrap = Bootstrap(app)
 
 
 @app.route('/')
 def index():
-	return render_template('index.html')
+	return render_template('index.html', current_time=datetime.utcnow())
 
 @app.route('/user/<name>')
 def user(name):
