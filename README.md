@@ -1,1 +1,1 @@
-This repository contains the a project detailed in Flask Web Development by Miguel Grinberg.
+This repository contains the project detailed in Flask Web Development by Miguel Grinberg.
